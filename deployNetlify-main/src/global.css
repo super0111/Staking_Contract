@@ -1,0 +1,33 @@
+body::-webkit-scrollbar {
+  display: none;
+}
+body {
+  overflow-y: scroll;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+@font-face {
+  font-family: "SourceSansPro-Semibold";
+  src: local("SourceSansPro-Semibold"), local("SourceSansPro-Semibold"), url("./assets/font/SourceSansPro/SourceSansPro-SemiBold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "SourceSansPro-Regular";
+  src: local("SourceSansPro-Regular"), local("SourceSansPro-Regular"), url("./assets/font/SourceSansPro/SourceSansPro-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "SourceSansPro-Bold";
+  src: local("SourceSansPro-Bold"), local("SourceSansPro-Bold"), url("./assets/font/SourceSansPro/SourceSansPro-Bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "SourceSansPro-Light";
+  src: local("SourceSansPro-Light"), local("SourceSansPro-Light"), url("./assets/font/SourceSansPro/SourceSansPro-Light.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Rubik-Regular";
+  src: local("Rubik-Regular"), local("Rubik-Regular"), url("./assets/font/Rubik/Rubik-Regular.ttf") format("truetype");
+}
