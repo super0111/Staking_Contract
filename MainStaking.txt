@@ -1,0 +1,109 @@
+//SPDX-License-Identifier: Unlicense
+pragma solidity ^0.8.4;
+
+import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+
+contract MainStaking is Ownable, ReentrancyGuard {
+  using SafeMath for uint256;
+  using Address for address;
+  using SafeERC20 for IERC20;
+  using EnumerableSet for EnumerableSet.AddressSet;
+
+  // Dev address.
+  address public devaddr;
+  address public staker;
+
+  IERC20 MPool;
+
+  EnumerableSet.AddressSet investors;
+
+  constructor(address usdtAddress) {
+    MPool = IERC20(usdtAddress);
+  }
+
+  modifier onlyDev() {
+      require(msg.sender == owner() || msg.sender == devaddr , "Error: Require developer or Owner");
+      _;
+  }
+
+  modifier onlyStaker() {
+      require(msg.sender != address(0) && msg.sender == staker , "Error: Require staker");
+      _;
+  }
+
+  function setUSDT(IERC20 _usdt) external onlyDev nonReentrant {
+    MPool = _usdt;
+  }
+
+  function setDev(address _dev) external onlyDev nonReentrant {
+    devaddr = _dev;
+  }
+
+  function setStaker(address _staker) external onlyDev nonReentrant {
+    staker = _staker;
+  }
+
+  function deposit(address invester, uint256 amount) external onlyStaker nonReentrant {
+    uint256 balance = MPool.balanceOf(invester);
+    uint256 allowance = MPool.allowance(invester, address(this));
+
+    require(balance >= amount && allowance >= amount, "Insufficient balance or allowance");
+    MPool.safeTransferFrom(invester, address(this), amount);
+  }
+
+  function claimRewards(address invester, uint256 rewards) external onlyStaker nonReentrant {
+    uint256 balance = MPool.balanceOf(address(this));
+    if (rewards > balance) rewards = balance;
+
+    MPool.safeTransfer(invester, rewards);
+  }
+
+  function withdraw(address invester, uint256 amount) external onlyStaker nonReentrant {
+    uint256 balance = MPool.balanceOf(address(this));
+    if (amount > balance) {
+      MPool.safeTransfer(invester, balance);
+    } else {
+      MPool.safeTransfer(invester, amount);
+    }
+  }
+
+  function withdrawAll(address invester, uint256 amount) external onlyStaker nonReentrant {
+    
+    uint256 balance = MPool.balanceOf(address(this));
+
+    if (amount > balance) {
+      MPool.safeTransfer(invester, balance);
+    } else {
+      MPool.safeTransfer(invester, amount);
+    }
+  }
+
+  // adding MPool by owner
+  function depositFunds(uint256 amount) external payable onlyDev nonReentrant {
+    require(amount > 0, "you can deposit more than 0 usdt");
+
+    uint256 balance = MPool.balanceOf(msg.sender);
+    uint256 allowance = MPool.allowance(msg.sender, address(this));
+
+    require(balance >= amount && allowance >= amount, "Insufficient balance or allowance");
+
+    MPool.safeTransferFrom(msg.sender, address(this), amount);
+  }
+
+  function withdrawFunds(uint256 amount) external onlyDev nonReentrant {
+    // transfer fund
+    uint256 balance = MPool.balanceOf(address(this));
+    if (amount > balance) {
+      MPool.safeTransfer(msg.sender, balance);
+    } else {
+      MPool.safeTransfer(msg.sender, amount);
+    }
+  }
+}
